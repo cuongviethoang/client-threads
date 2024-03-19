@@ -47,22 +47,14 @@ export default function SignupCard() {
 
             const data = await res.json();
             if (data.error) {
-                showToast({
-                    title: "Error",
-                    description: data.error,
-                    status: "error",
-                });
+                showToast("Error", data.error, "error");
                 return;
             }
             showToast("Success", data.message, "success");
             localStorage.setItem("user-threads", JSON.stringify(data));
             setUser(data);
         } catch (e) {
-            showToast({
-                title: "Error",
-                description: e,
-                status: "error",
-            });
+            showToast("Error", e, "error");
         }
     };
 
