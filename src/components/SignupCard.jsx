@@ -31,11 +31,14 @@ export default function SignupCard() {
         password: "",
     });
 
+    const [loading, setLoading] = useState(false);
+
     const showToast = useShowToast();
     const setUser = useSetRecoilState(userAtom);
 
     const handleSignup = async () => {
         // console.log(inputs);
+        setLoading(true);
         try {
             const res = await fetch("/api/users/signup", {
                 method: "POST",
@@ -55,6 +58,8 @@ export default function SignupCard() {
             setUser(data);
         } catch (e) {
             showToast("Error", e, "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -162,6 +167,7 @@ export default function SignupCard() {
                                     ),
                                 }}
                                 onClick={handleSignup}
+                                isLoading={loading}
                             >
                                 Sign up
                             </Button>

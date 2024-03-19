@@ -22,6 +22,7 @@ import userAtom from "../atoms/userAtom";
 
 export default function LoginCard() {
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     // setAuthScreen để chuyển hướng trang giữa login và logout
     const setAuthScreen = useSetRecoilState(authScreenAtom);
@@ -39,6 +40,7 @@ export default function LoginCard() {
 
     const handleLogin = async () => {
         // console.log(inputs);
+        setLoading(true);
         try {
             const res = await fetch("/api/users/login", {
                 method: "POST",
@@ -59,6 +61,8 @@ export default function LoginCard() {
             localStorage.setItem("user-threads", JSON.stringify(data));
         } catch (e) {
             showToast("Error", e, "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -127,7 +131,7 @@ export default function LoginCard() {
                         </FormControl>
                         <Stack spacing={10} pt={2}>
                             <Button
-                                loadingText="Submitting"
+                                loadingText="Logging in"
                                 size="lg"
                                 bg={useColorModeValue("gray.600", "gray.700")}
                                 color={"white"}
@@ -138,6 +142,7 @@ export default function LoginCard() {
                                     ),
                                 }}
                                 onClick={handleLogin}
+                                isLoading={loading}
                             >
                                 Login
                             </Button>

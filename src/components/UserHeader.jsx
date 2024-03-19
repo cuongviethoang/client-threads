@@ -28,7 +28,7 @@ const UserHeader = ({ user }) => {
 
     // kiểm tra xem mình có đang follow họ hay không
     const [following, setFollowing] = useState(
-        user.followers.includes(currentUser._id)
+        user?.followers.includes(currentUser?._id)
     );
 
     const [updating, setUpdating] = useState(false);
@@ -99,17 +99,17 @@ const UserHeader = ({ user }) => {
                     </Flex>
                 </Box>
                 <Box>
-                    {user.profilePic && (
+                    {user?.profilePic && (
                         <Avatar
-                            name={user.name}
-                            src={user.profilePic}
+                            name={user?.name}
+                            src={user?.profilePic}
                             size={{
                                 base: "md",
                                 md: "xl",
                             }}
                         />
                     )}
-                    {!user.profilePic && (
+                    {!user?.profilePic && (
                         <Avatar
                             name={user.name}
                             src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
@@ -121,14 +121,14 @@ const UserHeader = ({ user }) => {
                     )}
                 </Box>
             </Flex>
-            <Text>{user.bio}</Text>
+            <Text>{user?.bio}</Text>
 
-            {currentUser._id === user._id && (
+            {currentUser?._id === user?._id && (
                 <RouterLink to="/update">
                     <Button size={"sm"}>Update Profile</Button>
                 </RouterLink>
             )}
-            {currentUser._id !== user._id && (
+            {currentUser?._id !== user?._id && (
                 <Button
                     size={"sm"}
                     onClick={handleFollowUnFollow}
@@ -140,7 +140,7 @@ const UserHeader = ({ user }) => {
             <Flex w={"full"} justifyContent={"space-between"}>
                 <Flex gap={2} alignItems={"center"}>
                     <Text color={"gray.light"}>
-                        {user.followers.length} followers
+                        {user?.followers.length} followers
                     </Text>
                     <Box
                         w={1}
