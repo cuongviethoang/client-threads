@@ -24,6 +24,7 @@ const Header = () => {
                 src={
                     colorMode === "dark" ? "/light-logo.svg" : "/dark-logo.svg"
                 }
+                objectFit={"cover"}
                 onClick={toggleColorMode}
             />
 

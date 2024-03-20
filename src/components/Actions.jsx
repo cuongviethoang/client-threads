@@ -1,8 +1,25 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Flex,
+    FormControl,
+    Input,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Text,
+    useDisclosure,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+
+const MAX_CHAR = 200;
 
 const Actions = ({ post: post_ }) => {
     const user = useRecoilValue(userAtom);
@@ -12,13 +29,15 @@ const Actions = ({ post: post_ }) => {
 
     const showToast = useShowToast();
 
+    // like and unlike
     const handleLikeAndUnlike = async () => {
         if (!user) {
             showToast("Error", "You must be logged in to like a post", "error");
             return;
         }
-        // đang trong qáu trình xử lý like, ko cho phép click nhiều lần
+        // đang trong quá trình xử lý like, ko cho phép click nhiều lần
         if (isLiking) return;
+
         setIsLiking(true);
         try {
             const res = await fetch(`/api/posts/like/${post?._id}`, {
@@ -49,6 +68,67 @@ const Actions = ({ post: post_ }) => {
             setIsLiking(false);
         }
     };
+
+    // replies
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [reply, setReply] = useState("");
+
+    const [remaining, setRemaining] = useState(MAX_CHAR);
+    const [isLoadingReply, setIsLoadingReply] = useState(false);
+
+    const handleInputReply = (e) => {
+        const inputValue = e.target.value;
+        if (inputValue.startsWith(" ")) {
+            return;
+        }
+        if (inputValue.length > MAX_CHAR) {
+            setReply(inputValue.slice(0, MAX_CHAR));
+            setRemaining(0);
+        } else {
+            setReply(inputValue);
+            setRemaining(MAX_CHAR - inputValue.length);
+        }
+    };
+
+    const handleReply = async () => {
+        if (reply.length === 0) return;
+        if (!user) {
+            return showToast(
+                "Error",
+                "You must be logged in to reply a post",
+                "error"
+            );
+        }
+        if (isLoadingReply) return;
+        setIsLoadingReply(true);
+        try {
+            const res = await fetch(`/api/posts/reply/${post._id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ text: reply }),
+            });
+
+            const data = await res.json();
+            if (data?.error) {
+                showToast("Error", data?.error, "error");
+                return;
+            }
+            setPost({ ...post, replies: [...post.replies, data.reply] });
+            showToast("Success", "Reply added successfully", "success");
+            handleCloseModalReply();
+        } catch (e) {
+            showToast("Error", e, "error");
+        } finally {
+            setIsLoadingReply(false);
+        }
+    };
+
+    const handleCloseModalReply = () => {
+        onClose(), setReply(""), setRemaining(MAX_CHAR);
+    };
+
     return (
         // bỏ hành vi mặc định để khi ấn like sẽ động chuyển sang link post chi tiết
         <Flex flexDirection={"column"}>
@@ -78,6 +158,7 @@ const Actions = ({ post: post_ }) => {
                     role="img"
                     viewBox="0 0 24 24"
                     width="20"
+                    onClick={onOpen}
                 >
                     <title>Comment</title>
                     <path
@@ -107,6 +188,44 @@ const Actions = ({ post: post_ }) => {
                     {post?.likes.length} likes
                 </Text>
             </Flex>
+
+            <Modal isOpen={isOpen} onClose={handleCloseModalReply}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Reply</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody pb={6}>
+                        <FormControl>
+                            <Input
+                                placeholder="Reply go here!"
+                                value={reply}
+                                onChange={(e) => handleInputReply(e)}
+                            />
+                            <Text
+                                fontSize={"xs"}
+                                fontWeight={"bold"}
+                                textAlign={"right"}
+                                m={1}
+                                color={"gray.800"}
+                            >
+                                {remaining}/{MAX_CHAR}
+                            </Text>
+                        </FormControl>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <Button
+                            isLoading={isLoadingReply}
+                            colorScheme="blue"
+                            mr={3}
+                            size={"sm"}
+                            onClick={handleReply}
+                        >
+                            Reply
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Flex>
     );
 };

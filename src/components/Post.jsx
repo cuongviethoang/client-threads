@@ -5,11 +5,16 @@ import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 
 import { formatDistanceToNow } from "date-fns";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
 
 const Post = ({ post, postedBy }) => {
     const navigation = useNavigate();
     const showToast = useShowToast();
     const [user, setUser] = useState(null);
+
+    const currentUser = useRecoilValue(userAtom);
 
     useEffect(() => {
         const getUser = async () => {
@@ -38,8 +43,31 @@ const Post = ({ post, postedBy }) => {
         e.preventDefault();
         navigation(`/${user?.username}`);
     };
+
+    //delete post
+    const handleDeletePost = async (e) => {
+        try {
+            e.preventDefault();
+            if (!window.confirm("Are you sure you want to delete this post?"))
+                return;
+
+            const res = await fetch(`/api/posts/${post._id}`, {
+                method: "DELETE",
+            });
+
+            const data = await res.json();
+            if (data?.error) {
+                showToast("Error", data?.error, "error");
+                return;
+            }
+
+            showToast("Success", data?.message, "success");
+        } catch (e) {
+            showToast("Error", e, "error");
+        }
+    };
     return (
-        <Link to={`/${user?.username}/post/${post._id}`}>
+        <Link to={`/${user?.username}/post/${post?._id}`}>
             <Flex gap={3} mb={4} py={5}>
                 <Flex flexDirection={"column"} alignItems={"center"}>
                     <Avatar
@@ -114,7 +142,13 @@ const Post = ({ post, postedBy }) => {
                             >
                                 {user?.username}
                             </Text>
-                            <Image src="/verified.png" w={4} h={4} ml={1} />
+                            <Image
+                                objectFit={"cover"}
+                                src="/verified.png"
+                                w={4}
+                                h={4}
+                                ml={1}
+                            />
                         </Flex>
                         <Flex gap={4} alignItems={"center"}>
                             <Text
@@ -126,6 +160,12 @@ const Post = ({ post, postedBy }) => {
                                 {formatDistanceToNow(new Date(post?.createdAt))}{" "}
                                 ago
                             </Text>
+                            {currentUser?._id === user?._id && (
+                                <DeleteIcon
+                                    size={20}
+                                    onClick={(e) => handleDeletePost(e)}
+                                />
+                            )}
                         </Flex>
                     </Flex>
 
@@ -137,7 +177,11 @@ const Post = ({ post, postedBy }) => {
                             border={"1px solid"}
                             borderColor={"gray.light"}
                         >
-                            <Image src={post?.img} w={"full"} />
+                            <Image
+                                src={post?.img}
+                                w={"full"}
+                                objectFit={"cover"}
+                            />
                         </Box>
                     )}
 

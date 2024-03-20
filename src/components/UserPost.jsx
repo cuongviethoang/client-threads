@@ -52,7 +52,13 @@ const UserPost = ({ likes, replies, postImg, postTitle }) => {
                             <Text fontSize={"sm"} fontWeight={"bold"}>
                                 markzuckerberg
                             </Text>
-                            <Image src="/verified.png" w={4} h={4} ml={1} />
+                            <Image
+                                objectFit={"cover"}
+                                src="/verified.png"
+                                w={4}
+                                h={4}
+                                ml={1}
+                            />
                         </Flex>
                         <Flex gap={4} alignItems={"center"}>
                             <Text fontSize={"sm"} color={"gray.light"}>
@@ -70,7 +76,11 @@ const UserPost = ({ likes, replies, postImg, postTitle }) => {
                             border={"1px solid"}
                             borderColor={"gray.light"}
                         >
-                            <Image src={postImg} w={"full"} />
+                            <Image
+                                objectFit={"cover"}
+                                src={postImg}
+                                w={"full"}
+                            />
                         </Box>
                     )}
 

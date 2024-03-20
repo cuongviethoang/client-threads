@@ -143,7 +143,11 @@ const CreatePost = () => {
 
                         {imgUrl && (
                             <Flex mt={5} w={"full"} position={"relative"}>
-                                <Image src={imgUrl} alt="Selected img" />
+                                <Image
+                                    src={imgUrl}
+                                    alt="Selected img"
+                                    objectFit={"cover"}
+                                />
                                 <CloseButton
                                     onClick={() => {
                                         setImgUrl("");
