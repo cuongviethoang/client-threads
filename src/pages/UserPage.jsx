@@ -5,13 +5,16 @@ import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
 import useGetUserProfile from "../hooks/useGetUserProfile";
-const UserPage = () => {
-    const { user, loading } = useGetUserProfile();
-    const [posts, setPosts] = useState([]);
-    const [fetchingPosts, setFetchingPosts] = useState(true);
-    const { username } = useParams();
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postAtom";
 
+// trang hiển thị tất cả bài post của 1 người dùng
+const UserPage = () => {
     const showToast = useShowToast();
+    const { username } = useParams();
+    const { user, loading } = useGetUserProfile();
+    const [posts, setPosts] = useRecoilState(postsAtom);
+    const [fetchingPosts, setFetchingPosts] = useState(true);
 
     useEffect(() => {
         const getPosts = async () => {
@@ -34,9 +37,9 @@ const UserPage = () => {
                 setFetchingPosts(false);
             }
         };
-
+        console.log(">> value posts: ", posts);
         getPosts();
-    }, [username, showToast]);
+    }, [username, showToast, setPosts]);
 
     if (!user && loading) {
         return (

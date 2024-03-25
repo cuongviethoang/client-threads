@@ -22,22 +22,29 @@ import { useRef, useState } from "react";
 import usePreviewImg from "../hooks/usePreviewImg";
 import { BsFillImageFill } from "react-icons/bs";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+import postsAtom from "../atoms/postAtom";
+import { useParams } from "react-router-dom";
 
 const MAX_CHAR = 500;
 
 const CreatePost = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const [postText, setPostText] = useState("");
-    const [loading, setLoading] = useState(false);
-
     const currentUser = useRecoilValue(userAtom);
-
-    const imageRef = useRef(null);
-    const [remainingChar, setRemainingChar] = useState(MAX_CHAR);
+    const [posts, setPosts] = useRecoilState(postsAtom);
 
     const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const username = useParams();
+
+    const [postText, setPostText] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [remainingChar, setRemainingChar] = useState(MAX_CHAR);
+
+    const imageRef = useRef(null);
+
     const showToast = useShowToast();
 
     const handleTextChange = (e) => {
@@ -71,9 +78,12 @@ const CreatePost = () => {
             const data = await res.json();
             if (data.error) {
                 showToast("Error", data.error, "error");
+                return;
             }
-            console.log(data);
-            showToast("Success", data.message, "success");
+            showToast("Success", "Create post success", "success");
+            if (username === currentUser?.username) {
+                setPosts([data, ...posts]);
+            }
 
             onClose();
         } catch (e) {
@@ -94,12 +104,15 @@ const CreatePost = () => {
             <Button
                 position={"fixed"}
                 bottom={10}
-                right={10}
-                leftIcon={<AddIcon />}
+                right={5}
                 bg={useColorModeValue("gray.300", "gray.dark")}
                 onClick={onOpen}
+                size={{
+                    base: "sm",
+                    md: "md",
+                }}
             >
-                Post
+                <AddIcon />
             </Button>
 
             <Modal isOpen={isOpen} onClose={handleCloseModelPost}>

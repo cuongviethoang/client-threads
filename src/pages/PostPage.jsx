@@ -9,15 +9,16 @@ import {
     Spinner,
 } from "@chakra-ui/react";
 import Actions from "../components/Actions";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { useNavigate, useParams } from "react-router-dom";
 import useGetUserProfile from "../hooks/useGetUserProfile";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { DeleteIcon } from "@chakra-ui/icons";
 import Comment from "../components/Comment";
+import postsAtom from "../atoms/postAtom";
 
 // chi tiết 1 post
 const PostPage = () => {
@@ -26,7 +27,9 @@ const PostPage = () => {
     const { user, loading } = useGetUserProfile();
     const currentUser = useRecoilValue(userAtom);
     const showToast = useShowToast();
-    const [post, setPost] = useState(null);
+    const [posts, setPosts] = useRecoilState(postsAtom);
+
+    const currentPost = posts[0];
 
     useEffect(() => {
         const getPost = async () => {
@@ -38,14 +41,14 @@ const PostPage = () => {
                     showToast("Error", data?.error, "error");
                     return;
                 }
-                setPost(data);
+                setPosts([data]);
             } catch (e) {
                 showToast("Error", e, "error");
             }
         };
 
         getPost();
-    }, [pid, showToast]);
+    }, [pid, showToast, setPosts]);
 
     if (!user && loading) {
         return (
@@ -55,7 +58,7 @@ const PostPage = () => {
         );
     }
 
-    if (!post) return null;
+    if (!currentPost) return null;
 
     // delete post;
     const handleDeletePost = async () => {
@@ -63,7 +66,7 @@ const PostPage = () => {
             if (!window.confirm("Are you sure you want to delete this post?"))
                 return;
 
-            const res = await fetch(`/api/posts/${pid}`, {
+            const res = await fetch(`/api/posts/${currentPost?._id}`, {
                 method: "DELETE",
             });
 
@@ -114,7 +117,8 @@ const PostPage = () => {
                         color={"gray.light"}
                         textAlign={"right"}
                     >
-                        {formatDistanceToNow(new Date(post?.createdAt))} ago
+                        {formatDistanceToNow(new Date(currentPost?.createdAt))}{" "}
+                        ago
                     </Text>
                     {currentUser?._id === user?._id && (
                         <DeleteIcon
@@ -125,19 +129,23 @@ const PostPage = () => {
                     )}
                 </Flex>
             </Flex>
-            <Text my={3}>{post?.text}</Text>
-            {post?.img && (
+            <Text my={3}>{currentPost?.text}</Text>
+            {currentPost?.img && (
                 <Box
                     borderRadius={6}
                     overflow={"hidden"}
                     border={"1px solid"}
                     borderColor={"gray.light"}
                 >
-                    <Image objectFit={"cover"} src={post?.img} w={"full"} />
+                    <Image
+                        objectFit={"cover"}
+                        src={currentPost?.img}
+                        w={"full"}
+                    />
                 </Box>
             )}
             <Flex gap={3} my={3}>
-                <Actions post={post} />
+                <Actions post={currentPost} />
             </Flex>
 
             <Divider my={4} />
@@ -152,15 +160,17 @@ const PostPage = () => {
                 <Button>Get</Button>
             </Flex>
             <Divider my={4} />
-            {post &&
-                post?.replies.length > 0 &&
-                post?.replies.map((reply, index) => (
+            {currentPost &&
+                currentPost?.replies.length > 0 &&
+                currentPost?.replies.map((reply, index) => (
                     <Comment
                         key={index}
                         reply={reply}
                         lastReply={
                             reply?._id ===
-                            post?.replies[post?.replies.length - 1]?._id
+                            currentPost?.replies[
+                                currentPost?.replies.length - 1
+                            ]?._id
                         }
                     />
                 ))}

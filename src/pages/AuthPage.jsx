@@ -7,7 +7,6 @@ const AuthPage = () => {
     // useSetRecoilState dùng để set lại giá trị default
     // useRecoilValue dùng để lấy giá trị default ra sử dụng
     const authScreenState = useRecoilValue(authScreenAtom);
-    console.log(authScreenState);
 
     return <>{authScreenState === "login" ? <LoginCard /> : <SignupCard />}</>;
 };
