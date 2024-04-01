@@ -1,6 +1,11 @@
 import { Avatar, Flex, Text } from "@chakra-ui/react";
+import { useRecoilValue } from "recoil";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
+import userAtom from "../atoms/userAtom";
 
-const Message = ({ ownMessage }) => {
+const Message = ({ ownMessage, message }) => {
+    const selectedConversation = useRecoilValue(selectedConversationAtom);
+    const currentUser = useRecoilValue(userAtom);
     return (
         <>
             {ownMessage ? (
@@ -11,14 +16,29 @@ const Message = ({ ownMessage }) => {
                         p={1}
                         borderRadius={"md"}
                     >
-                        Lorem ipsum dolor, sit amet consectetur adipisicing
-                        elit.
+                        {message?.text}
                     </Text>
-                    <Avatar src="" w={7} h={7} />
+                    <Avatar
+                        src={
+                            currentUser?.profilePic
+                                ? currentUser?.profilePic
+                                : ""
+                        }
+                        w={7}
+                        h={7}
+                    />
                 </Flex>
             ) : (
                 <Flex gap={2} alignSelf={"flex-start"}>
-                    <Avatar src="" w={7} h={7} />
+                    <Avatar
+                        src={
+                            selectedConversation?.userprofilePic
+                                ? selectedConversation?.userprofilePic
+                                : ""
+                        }
+                        w={7}
+                        h={7}
+                    />
                     <Text
                         maxW={"320px"}
                         bg={"gray.400"}
@@ -26,8 +46,7 @@ const Message = ({ ownMessage }) => {
                         borderRadius={"md"}
                         color={"black"}
                     >
-                        Lorem ipsum dolor, sit amet consectetur adipisicing
-                        elit.
+                        {message?.text}
                     </Text>
                 </Flex>
             )}

@@ -10,8 +10,49 @@ import {
 } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
+import { useEffect, useState } from "react";
+import useShowToast from "../hooks/useShowToast";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
+import userAtom from "../atoms/userAtom";
 
 const MessageContainer = () => {
+    const showToast = useShowToast();
+    const currentUser = useRecoilValue(userAtom);
+    const [selectedConversation, setSelectedConversation] = useRecoilState(
+        selectedConversationAtom
+    );
+
+    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [messages, setMessages] = useState([]);
+
+    useEffect(() => {
+        const getMessages = async () => {
+            setLoadingMessages(true);
+            setMessages([]);
+            try {
+                if (selectedConversation?.mock) return;
+                const res = await fetch(
+                    `/api/messages/${selectedConversation.userId}`
+                );
+                const data = await res.json();
+                console.log(data);
+                if (data?.error) {
+                    showToast("Error", data.error, "error");
+                    return;
+                }
+
+                setMessages(data);
+            } catch (e) {
+                showToast("Error", e?.message, "error");
+            } finally {
+                setLoadingMessages(false);
+            }
+        };
+
+        getMessages();
+    }, [showToast, selectedConversation.userId]);
+
     return (
         <Flex
             flex="70"
@@ -22,9 +63,13 @@ const MessageContainer = () => {
         >
             {/* Message Header */}
             <Flex w={"full"} h={12} alignItems={"center"} gap={2}>
-                <Avatar src="" size={"sm"} />
+                <Avatar
+                    src={selectedConversation?.userProfilePic}
+                    size={"sm"}
+                />
                 <Text display={"flex"} alignItems={"center"}>
-                    johndoe <Image src="/verified.png" w={4} h={4} ml={1} />
+                    {selectedConversation?.username}{" "}
+                    <Image src="/verified.png" w={4} h={4} ml={1} />
                 </Text>
             </Flex>
 
@@ -39,7 +84,7 @@ const MessageContainer = () => {
                 overflowY={"auto"}
                 px={2}
             >
-                {false &&
+                {loadingMessages &&
                     [...Array(5)].map((_, i) => (
                         <Flex
                             key={i}
@@ -59,18 +104,19 @@ const MessageContainer = () => {
                             {i % 2 !== 0 && <SkeletonCircle size={7} />}
                         </Flex>
                     ))}
-
-                <Message ownMessage={true} />
-                <Message ownMessage={false} />
-                <Message ownMessage={false} />
-                <Message ownMessage={true} />
-                <Message ownMessage={false} />
-                <Message ownMessage={false} />
-                <Message ownMessage={false} />
-                <Message ownMessage={false} />
+                {!loadingMessages &&
+                    messages &&
+                    messages.length > 0 &&
+                    messages.map((message, index) => (
+                        <Message
+                            message={message}
+                            ownMessage={currentUser._id === message?.sender}
+                            key={index}
+                        />
+                    ))}
             </Flex>
 
-            <MessageInput />
+            <MessageInput setMessages={setMessages} />
         </Flex>
     );
 };

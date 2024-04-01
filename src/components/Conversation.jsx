@@ -6,16 +6,22 @@ import {
     Stack,
     Text,
     WrapItem,
+    useColorMode,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { BsCheck2All } from "react-icons/bs";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
 
 const Conversation = ({ conversation }) => {
     const user = conversation?.participants[0];
     const currentUser = useRecoilValue(userAtom);
     const lastMessage = conversation?.lastMessage;
+    const [selectedConversation, setSelectedConversation] = useRecoilState(
+        selectedConversationAtom
+    );
+    const colorMode = useColorMode();
 
     return (
         <Flex
@@ -28,6 +34,25 @@ const Conversation = ({ conversation }) => {
                 color: "white",
             }}
             borderRadius={"md"}
+            onClick={() =>
+                setSelectedConversation({
+                    mock: conversation?.mock,
+                    _id: conversation._id,
+                    userId: user._id,
+                    username: user.username,
+                    userProfilePic: user?.profilePic
+                        ? user?.profilePic
+                        : "https://bit.ly/broken-link",
+                })
+            }
+            bg={
+                selectedConversation._id === conversation._id
+                    ? colorMode === "light"
+                        ? "gray.400"
+                        : "gray.dark"
+                    : ""
+            }
+            color={selectedConversation._id === conversation._id ? "white" : ""}
         >
             <WrapItem>
                 <Avatar
