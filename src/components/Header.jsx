@@ -7,6 +7,7 @@ import { RxAvatar } from "react-icons/rx";
 import { FiLogOut } from "react-icons/fi";
 import useLogout from "../hooks/useLogout";
 import authScreenAtom from "../atoms/authAtom";
+import { BsFillChatQuoteFill } from "react-icons/bs";
 
 const Header = () => {
     const { colorMode, toggleColorMode } = useColorMode();
@@ -42,6 +43,9 @@ const Header = () => {
                 <Flex alignItems={"center"} gap={4}>
                     <RouterLink to={`/${user.username}`}>
                         <RxAvatar size={24} />
+                    </RouterLink>
+                    <RouterLink to={`/chat`}>
+                        <BsFillChatQuoteFill size={24} />
                     </RouterLink>
                     <Button size={"xs"} onClick={logout}>
                         <FiLogOut size={20} />
