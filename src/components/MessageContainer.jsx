@@ -10,21 +10,66 @@ import {
 } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { selectedConversationAtom } from "../atoms/messagesAtom";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import {
+    conversationsAtom,
+    selectedConversationAtom,
+} from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
+import { useSocket } from "../context/SocketContext";
 
 const MessageContainer = () => {
+    const { socket } = useSocket();
     const showToast = useShowToast();
+
+    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [messages, setMessages] = useState([]);
+
     const currentUser = useRecoilValue(userAtom);
     const [selectedConversation, setSelectedConversation] = useRecoilState(
         selectedConversationAtom
     );
+    const setConversations = useSetRecoilState(conversationsAtom);
 
-    const [loadingMessages, setLoadingMessages] = useState(true);
-    const [messages, setMessages] = useState([]);
+    const messageEndRef = useRef(null);
+
+    useEffect(() => {
+        socket.on("newMessage", (message) => {
+            // check xem message sẽ được nhận về ở khung chat nào, nếu không có check này
+            // thì chỉ cân đang ở khung chat khác vẫn có thể nhận được tin nhắn không đúng người nhận
+            // setMessages((prevMessages) => [...prevMessages, message]);
+
+            if (selectedConversation?._id === message?.conversationId) {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            }
+
+            // của người nhận message: đẩy conversation lên đầu tiên
+            setConversations((prevConversations) => {
+                const newConversations = [];
+                prevConversations.forEach((conversation) => {
+                    if (conversation?._id === message?.conversationId) {
+                        return newConversations.unshift({
+                            ...conversation,
+                            lastMessage: {
+                                text: message?.text,
+                                sender: message?.sender,
+                            },
+                        });
+                    }
+                    return newConversations.push(conversation);
+                });
+                return newConversations;
+            });
+        });
+
+        return () => socket.off("newMessage");
+    }, [socket]);
+
+    useEffect(() => {
+        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     useEffect(() => {
         const getMessages = async () => {
@@ -108,11 +153,21 @@ const MessageContainer = () => {
                     messages &&
                     messages.length > 0 &&
                     messages.map((message, index) => (
-                        <Message
-                            message={message}
-                            ownMessage={currentUser._id === message?.sender}
+                        <Flex
                             key={index}
-                        />
+                            direction={"column"}
+                            ref={
+                                messages.length - 1 ===
+                                messages.indexOf(message)
+                                    ? messageEndRef
+                                    : null
+                            }
+                        >
+                            <Message
+                                message={message}
+                                ownMessage={currentUser._id === message?.sender}
+                            />
+                        </Flex>
                     ))}
             </Flex>
 

@@ -38,19 +38,21 @@ const MessageInput = ({ setMessages }) => {
 
             setMessages((messages) => [...messages, data]);
 
+            // của người gửi message: Đẩy conversation lên đầu tiên
             setConversations((prevConvs) => {
-                const updateConversations = prevConvs.map((conversation) => {
+                const updateConversations = [];
+                prevConvs.forEach((conversation) => {
                     if (conversation?._id === selectedConversation?._id) {
-                        return {
+                        return updateConversations.unshift({
                             ...conversation,
                             mock: false,
                             lastMessage: {
                                 text: messageText,
                                 sender: data?.sender,
                             },
-                        };
+                        });
                     }
-                    return conversation;
+                    return updateConversations.push(conversation);
                 });
                 return updateConversations;
             });

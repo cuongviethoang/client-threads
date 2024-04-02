@@ -18,24 +18,12 @@ const Message = ({ ownMessage, message }) => {
                     >
                         {message?.text}
                     </Text>
-                    <Avatar
-                        src={
-                            currentUser?.profilePic
-                                ? currentUser?.profilePic
-                                : ""
-                        }
-                        w={7}
-                        h={7}
-                    />
+                    <Avatar src={currentUser?.profilePic} w={7} h={7} />
                 </Flex>
             ) : (
                 <Flex gap={2} alignSelf={"flex-start"}>
                     <Avatar
-                        src={
-                            selectedConversation?.userprofilePic
-                                ? selectedConversation?.userprofilePic
-                                : ""
-                        }
+                        src={selectedConversation?.userProfilePic}
                         w={7}
                         h={7}
                     />
