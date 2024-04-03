@@ -36,9 +36,10 @@ const MessageInput = ({ setMessages }) => {
                 return;
             }
 
+            // đẩy data message vào messageContainer của người gửi tin nhắn
             setMessages((messages) => [...messages, data]);
 
-            // của người gửi message: Đẩy conversation lên đầu tiên
+            // người gửi message: Đẩy conversation lên đầu tiên
             setConversations((prevConvs) => {
                 const updateConversations = [];
                 prevConvs.forEach((conversation) => {

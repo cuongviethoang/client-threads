@@ -37,6 +37,52 @@ const ChatPage = () => {
     const { socket, onlineUsers } = useSocket();
 
     useEffect(() => {
+        socket?.on("messagesSeen", ({ conversationId }) => {
+            setConversations((prev) => {
+                const updatedConversations = [];
+                prev.forEach((conversation) => {
+                    if (conversation._id === conversationId) {
+                        return updatedConversations.unshift({
+                            ...conversation,
+                            lastMessage: {
+                                ...conversation.lastMessage,
+                                seen: true,
+                            },
+                        });
+                    }
+                    return updatedConversations.push(conversation);
+                });
+                return updatedConversations;
+            });
+        });
+        return () => socket.off("messagesSeen");
+    }, [socket, setConversations]);
+
+    useEffect(() => {
+        socket.on("newMessage", (message) => {
+            // người nhận message: đẩy conversation lên đầu tiên
+            setConversations((prevConversations) => {
+                const newConversations = [];
+                prevConversations.forEach((conversation) => {
+                    if (conversation?._id === message?.conversationId) {
+                        return newConversations.unshift({
+                            ...conversation,
+                            lastMessage: {
+                                text: message?.text,
+                                sender: message?.sender,
+                            },
+                        });
+                    }
+                    return newConversations.push(conversation);
+                });
+                return newConversations;
+            });
+        });
+
+        return () => socket.off("newMessage");
+    }, [socket, selectedConversation, setConversations]);
+
+    useEffect(() => {
         const getConversation = async () => {
             setLoadingConversations(true);
             try {
@@ -46,6 +92,7 @@ const ChatPage = () => {
                     showToast("Error", data.error, "error");
                     return;
                 }
+                console.log("conversation: ", data);
                 setConversations(data);
             } catch (e) {
                 showToast("Error", e?.message, "error");
@@ -92,6 +139,7 @@ const ChatPage = () => {
                 return;
             }
 
+            // Nếu chưa có conversation của người nhận thì tạo 1 conversation mới.
             const mockConversation = {
                 mock: true,
                 lastMessage: {

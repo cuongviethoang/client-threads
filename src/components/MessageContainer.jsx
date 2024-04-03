@@ -12,7 +12,7 @@ import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useEffect, useRef, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
     conversationsAtom,
     selectedConversationAtom,
@@ -28,9 +28,7 @@ const MessageContainer = () => {
     const [messages, setMessages] = useState([]);
 
     const currentUser = useRecoilValue(userAtom);
-    const [selectedConversation, setSelectedConversation] = useRecoilState(
-        selectedConversationAtom
-    );
+    const selectedConversation = useRecoilValue(selectedConversationAtom);
     const setConversations = useSetRecoilState(conversationsAtom);
 
     const messageEndRef = useRef(null);
@@ -45,7 +43,7 @@ const MessageContainer = () => {
                 setMessages((prevMessages) => [...prevMessages, message]);
             }
 
-            // của người nhận message: đẩy conversation lên đầu tiên
+            // người nhận message: đẩy conversation lên đầu tiên
             setConversations((prevConversations) => {
                 const newConversations = [];
                 prevConversations.forEach((conversation) => {
@@ -65,7 +63,44 @@ const MessageContainer = () => {
         });
 
         return () => socket.off("newMessage");
-    }, [socket]);
+    }, [socket, selectedConversation, setConversations]);
+
+    useEffect(() => {
+        // lấy ra tin nhắn cuối cùng trong cuộc trò chuyện với điều kiện người gửi tin
+        // nhắn không phải là chính người đăng nhập
+        // (messages[messages.length - 1].sender !== currentUser._id;)
+        const lastMessageIsFromOtherUser =
+            messages.length &&
+            messages[messages.length - 1].sender !== currentUser._id;
+
+        // nếu người nhận tin nhắn đang ở trong conversation(vì nếu có selectedConversation có
+        // nghĩa là người nhận đã click vào conversation đó)
+        if (lastMessageIsFromOtherUser) {
+            socket.emit("markMessagesSeen", {
+                conversationId: selectedConversation._id, // id cuộc trò chuyện
+                userId: selectedConversation.userId, // id người nhận
+            });
+        }
+
+        // nếu người nhận cũng đang ở trong conversation với ng đang gửi tin nhắn
+        // thì seen(đã đọc) chuyển thành true.
+        socket.on("messagesSeen", ({ conversationId }) => {
+            if (selectedConversation._id === conversationId) {
+                setMessages((prev) => {
+                    const updateMessages = prev.map((message) => {
+                        if (message?.seen === false) {
+                            return {
+                                ...message,
+                                seen: true,
+                            };
+                        }
+                        return message;
+                    });
+                    return updateMessages;
+                });
+            }
+        });
+    }, [socket, currentUser?._id, messages, selectedConversation]);
 
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,6 +111,9 @@ const MessageContainer = () => {
             setLoadingMessages(true);
             setMessages([]);
             try {
+                // nếu mock === true thì có nghĩa là conversation mới tạo, không có tin nhắn
+                // vì không có tin nhắn nên sẽ không có conversation trong db của có 1
+                // mockConversation tự custom trên giao diện. Chình vì thế return để ko gọi api
                 if (selectedConversation?.mock) return;
                 const res = await fetch(
                     `/api/messages/${selectedConversation.userId}`
@@ -96,7 +134,7 @@ const MessageContainer = () => {
         };
 
         getMessages();
-    }, [showToast, selectedConversation.userId]);
+    }, [showToast, selectedConversation.userId, selectedConversation.mock]);
 
     return (
         <Flex

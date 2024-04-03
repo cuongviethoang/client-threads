@@ -1,6 +1,7 @@
 import {
     Avatar,
     AvatarBadge,
+    Box,
     Flex,
     Image,
     Stack,
@@ -15,8 +16,12 @@ import { BsCheck2All } from "react-icons/bs";
 import { selectedConversationAtom } from "../atoms/messagesAtom";
 
 const Conversation = ({ conversation, isOnline }) => {
+    // thông tin user này chính là của người nhận
     const user = conversation?.participants[0];
+
+    // thông tin user của người gửi
     const currentUser = useRecoilValue(userAtom);
+
     const lastMessage = conversation?.lastMessage;
     const [selectedConversation, setSelectedConversation] = useRecoilState(
         selectedConversationAtom
@@ -83,7 +88,9 @@ const Conversation = ({ conversation, isOnline }) => {
                     gap={1}
                 >
                     {currentUser?._id === lastMessage?.sender ? (
-                        <BsCheck2All size={16} />
+                        <Box color={lastMessage?.seen ? "blue.400" : ""}>
+                            <BsCheck2All size={16} />
+                        </Box>
                     ) : (
                         ""
                     )}
