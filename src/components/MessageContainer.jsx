@@ -102,6 +102,7 @@ const MessageContainer = () => {
         });
     }, [socket, currentUser?._id, messages, selectedConversation]);
 
+    // xử lý cuộn đến phần tử có ref = messageEndRef
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);

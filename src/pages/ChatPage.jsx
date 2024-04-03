@@ -55,11 +55,11 @@ const ChatPage = () => {
                 return updatedConversations;
             });
         });
-        return () => socket.off("messagesSeen");
+        return () => socket?.off("messagesSeen");
     }, [socket, setConversations]);
 
     useEffect(() => {
-        socket.on("newMessage", (message) => {
+        socket?.on("newMessage", (message) => {
             // người nhận message: đẩy conversation lên đầu tiên
             setConversations((prevConversations) => {
                 const newConversations = [];
@@ -79,7 +79,7 @@ const ChatPage = () => {
             });
         });
 
-        return () => socket.off("newMessage");
+        return () => socket?.off("newMessage");
     }, [socket, selectedConversation, setConversations]);
 
     useEffect(() => {

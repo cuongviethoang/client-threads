@@ -10,7 +10,7 @@ export const useSocket = () => {
 };
 
 export const SocketContextProvider = ({ children }) => {
-    const [socket, setSocket] = useState([]);
+    const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
     const user = useRecoilValue(userAtom);
 
@@ -20,6 +20,7 @@ export const SocketContextProvider = ({ children }) => {
                 userId: user?._id,
             },
         });
+
         setSocket(socket);
 
         // lắng nghe tất cả sự kiện có topic là getOnlineUsers
