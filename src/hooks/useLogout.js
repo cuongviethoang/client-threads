@@ -1,7 +1,9 @@
 import { useSetRecoilState } from "recoil";
-import useShowToast from "./useShowToast";
-import userAtom from "../atoms/userAtom";
 import { useNavigate } from "react-router-dom";
+
+import userAtom from "../atoms/userAtom";
+
+import useShowToast from "./useShowToast";
 
 const useLogout = () => {
     const setUser = useSetRecoilState(userAtom);
@@ -18,7 +20,6 @@ const useLogout = () => {
             });
 
             const data = await res.json();
-            console.log(data);
             if (data.error) {
                 showToast("Error", data.error, "error");
                 return;

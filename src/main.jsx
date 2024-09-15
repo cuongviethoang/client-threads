@@ -1,14 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import "./index.css";
+import { BrowserRouter } from "react-router-dom";
+import { ColorModeScript } from "@chakra-ui/react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 import { extendTheme } from "@chakra-ui/theme-utils";
-import { ColorModeScript } from "@chakra-ui/react";
-import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
+
 import { SocketContextProvider } from "./context/SocketContext.jsx";
+
+import App from "./App.jsx";
+import "./index.css";
 
 const styles = {
     global: (props) => ({

@@ -16,24 +16,22 @@ import {
 import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useSetRecoilState } from "recoil";
+
 import authScreenAtom from "../atoms/authAtom";
-import useShowToast from "../hooks/useShowToast";
 import userAtom from "../atoms/userAtom";
 
+import useShowToast from "../hooks/useShowToast";
+
 export default function LoginCard() {
+    const setAuthScreen = useSetRecoilState(authScreenAtom);
+    const setUser = useSetRecoilState(userAtom);
+
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    // setAuthScreen để chuyển hướng trang giữa login và logout
-    const setAuthScreen = useSetRecoilState(authScreenAtom);
-
     const [inputs, setInputs] = useState({
         username: "",
         password: "",
     });
-
-    // setUser để khi đăng nhập sẽ lưu được thông tin user trong userAtom
-    const setUser = useSetRecoilState(userAtom);
 
     // custom hook toast
     const showToast = useShowToast();

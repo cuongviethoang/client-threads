@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
     Avatar,
     Flex,
@@ -8,25 +9,29 @@ import {
     Button,
     Spinner,
 } from "@chakra-ui/react";
-import Actions from "../components/Actions";
-import { useEffect } from "react";
-import useShowToast from "../hooks/useShowToast";
+import { DeleteIcon } from "@chakra-ui/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import useGetUserProfile from "../hooks/useGetUserProfile";
 import { formatDistanceToNow } from "date-fns";
 import { useRecoilState, useRecoilValue } from "recoil";
-import userAtom from "../atoms/userAtom";
-import { DeleteIcon } from "@chakra-ui/icons";
-import Comment from "../components/Comment";
-import postsAtom from "../atoms/postAtom";
 
-// chi tiết 1 post
+import postsAtom from "../atoms/postAtom";
+import userAtom from "../atoms/userAtom";
+
+import useShowToast from "../hooks/useShowToast";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+
+import Comment from "../components/Comment";
+import Actions from "../components/Actions";
+
 const PostPage = () => {
     const navigate = useNavigate();
+
     const { pid } = useParams();
+
     const { user, loading } = useGetUserProfile();
-    const currentUser = useRecoilValue(userAtom);
     const showToast = useShowToast();
+
+    const currentUser = useRecoilValue(userAtom);
     const [posts, setPosts] = useRecoilState(postsAtom);
 
     const currentPost = posts[0];
@@ -46,7 +51,6 @@ const PostPage = () => {
                 showToast("Error", e, "error");
             }
         };
-
         getPost();
     }, [pid, showToast, setPosts]);
 
@@ -60,7 +64,6 @@ const PostPage = () => {
 
     if (!currentPost) return null;
 
-    // delete post;
     const handleDeletePost = async () => {
         try {
             if (!window.confirm("Are you sure you want to delete this post?"))
@@ -99,7 +102,6 @@ const PostPage = () => {
                     <Flex>
                         <Text fontSize={"sm"} fontWeight={"bold"}>
                             {user?.username}
-                            Cuong
                         </Text>
                         <Image
                             objectFit={"cover"}

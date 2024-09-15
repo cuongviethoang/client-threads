@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import {
     Flex,
     Image,
@@ -13,31 +14,31 @@ import {
     Spinner,
     useDisclosure,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { IoSendSharp } from "react-icons/io5";
-import useShowToast from "../hooks/useShowToast";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { BsFillImageFill } from "react-icons/bs";
+import { IoSendSharp } from "react-icons/io5";
+
+import useShowToast from "../hooks/useShowToast";
+import usePreviewImg from "../hooks/usePreviewImg";
+
 import {
     conversationsAtom,
     selectedConversationAtom,
 } from "../atoms/messagesAtom";
-import { BsFillImageFill } from "react-icons/bs";
-import usePreviewImg from "../hooks/usePreviewImg";
 
 const MessageInput = ({ setMessages }) => {
     const showToast = useShowToast();
+    const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
 
-    const [messageText, setMessageText] = useState("");
-    const [isSending, setIsSending] = useState(false);
+    const { onClose } = useDisclosure();
 
     const selectedConversation = useRecoilValue(selectedConversationAtom);
     const setConversations = useSetRecoilState(conversationsAtom);
 
-    const { onClose } = useDisclosure();
-
-    const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
-
     const imageRef = useRef(null);
+
+    const [messageText, setMessageText] = useState("");
+    const [isSending, setIsSending] = useState(false);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();

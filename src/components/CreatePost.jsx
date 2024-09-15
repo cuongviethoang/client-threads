@@ -1,4 +1,5 @@
-import { AddIcon } from "@chakra-ui/icons";
+import { useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
     Button,
     CloseButton,
@@ -18,34 +19,32 @@ import {
     useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import usePreviewImg from "../hooks/usePreviewImg";
-import { BsFillImageFill } from "react-icons/bs";
-import useShowToast from "../hooks/useShowToast";
+import { AddIcon } from "@chakra-ui/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { BsFillImageFill } from "react-icons/bs";
+
+import usePreviewImg from "../hooks/usePreviewImg";
+import useShowToast from "../hooks/useShowToast";
+
 import userAtom from "../atoms/userAtom";
 import postsAtom from "../atoms/postAtom";
-import { useParams } from "react-router-dom";
 
 const MAX_CHAR = 500;
 
 const CreatePost = () => {
+    const username = useParams();
+    const imageRef = useRef(null);
+
     const currentUser = useRecoilValue(userAtom);
     const [posts, setPosts] = useRecoilState(postsAtom);
 
     const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
-
+    const showToast = useShowToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const username = useParams();
 
     const [postText, setPostText] = useState("");
     const [loading, setLoading] = useState(false);
     const [remainingChar, setRemainingChar] = useState(MAX_CHAR);
-
-    const imageRef = useRef(null);
-
-    const showToast = useShowToast();
 
     const handleTextChange = (e) => {
         const inputText = e.target.value;

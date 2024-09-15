@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
     Avatar,
     Divider,
@@ -8,30 +9,34 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
-import Message from "./Message";
-import MessageInput from "./MessageInput";
-import { useEffect, useRef, useState } from "react";
-import useShowToast from "../hooks/useShowToast";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+
 import {
     conversationsAtom,
     selectedConversationAtom,
 } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
+
 import { useSocket } from "../context/SocketContext";
+
+import useShowToast from "../hooks/useShowToast";
+
+import Message from "./Message";
+import MessageInput from "./MessageInput";
+import messageSound from "../assets/sounds/message.mp3";
 
 const MessageContainer = () => {
     const { socket } = useSocket();
     const showToast = useShowToast();
 
-    const [loadingMessages, setLoadingMessages] = useState(true);
-    const [messages, setMessages] = useState([]);
+    const messageEndRef = useRef(null);
 
     const currentUser = useRecoilValue(userAtom);
     const selectedConversation = useRecoilValue(selectedConversationAtom);
     const setConversations = useSetRecoilState(conversationsAtom);
 
-    const messageEndRef = useRef(null);
+    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
         socket.on("newMessage", (message) => {
@@ -43,6 +48,10 @@ const MessageContainer = () => {
                 setMessages((prevMessages) => [...prevMessages, message]);
             }
 
+            if (!document.hasFocus()) {
+                const sound = new Audio(messageSound);
+                sound.play();
+            }
             // người nhận message: đẩy conversation lên đầu tiên
             setConversations((prevConversations) => {
                 const newConversations = [];
@@ -66,15 +75,13 @@ const MessageContainer = () => {
     }, [socket, selectedConversation, setConversations]);
 
     useEffect(() => {
-        // lấy ra tin nhắn cuối cùng trong cuộc trò chuyện với điều kiện người gửi tin
-        // nhắn không phải là chính người đăng nhập
-        // (messages[messages.length - 1].sender !== currentUser._id;)
+        // đang ở trong 1 container message thì có nghĩa là mình đang chat với 1 ng nào đó
+        // kiểm tra xem tin nhắn cuối cùng đc gửi có phải của ng khác gửi cho mình không
+        // nếu đúng => đánh dấu là đã xem (markMessageSeen) => vì đang ở trong 1 selectedConversation mà
         const lastMessageIsFromOtherUser =
             messages.length &&
             messages[messages.length - 1].sender !== currentUser._id;
 
-        // nếu người nhận tin nhắn đang ở trong conversation(vì nếu có selectedConversation có
-        // nghĩa là người nhận đã click vào conversation đó)
         if (lastMessageIsFromOtherUser) {
             socket.emit("markMessagesSeen", {
                 conversationId: selectedConversation._id, // id cuộc trò chuyện
@@ -82,8 +89,6 @@ const MessageContainer = () => {
             });
         }
 
-        // nếu người nhận cũng đang ở trong conversation với ng đang gửi tin nhắn
-        // thì seen(đã đọc) chuyển thành true.
         socket.on("messagesSeen", ({ conversationId }) => {
             if (selectedConversation._id === conversationId) {
                 setMessages((prev) => {
@@ -113,14 +118,13 @@ const MessageContainer = () => {
             setMessages([]);
             try {
                 // nếu mock === true thì có nghĩa là conversation mới tạo, không có tin nhắn
-                // vì không có tin nhắn nên sẽ không có conversation trong db của có 1
+                // vì không có tin nhắn nên sẽ không có conversation trong db chỉ có 1
                 // mockConversation tự custom trên giao diện. Chình vì thế return để ko gọi api
                 if (selectedConversation?.mock) return;
                 const res = await fetch(
                     `/api/messages/${selectedConversation.userId}`
                 );
                 const data = await res.json();
-                console.log(data);
                 if (data?.error) {
                     showToast("Error", data.error, "error");
                     return;

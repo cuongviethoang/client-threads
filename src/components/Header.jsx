@@ -1,13 +1,17 @@
 import { Button, Flex, Image, useColorMode } from "@chakra-ui/react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import userAtom from "../atoms/userAtom";
 import { Link as RouterLink } from "react-router-dom";
-import { AiFillHome } from "react-icons/ai";
-import { RxAvatar } from "react-icons/rx";
-import { FiLogOut } from "react-icons/fi";
-import useLogout from "../hooks/useLogout";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+
+import userAtom from "../atoms/userAtom";
 import authScreenAtom from "../atoms/authAtom";
+
+import useLogout from "../hooks/useLogout";
+
+import { FiLogOut } from "react-icons/fi";
+import { RxAvatar } from "react-icons/rx";
 import { BsFillChatQuoteFill } from "react-icons/bs";
+import { MdOutlineSettings } from "react-icons/md";
+import { AiFillHome } from "react-icons/ai";
 
 const Header = () => {
     const { colorMode, toggleColorMode } = useColorMode();
@@ -24,7 +28,12 @@ const Header = () => {
                 </RouterLink>
             )}
             {!user && (
-                <RouterLink onClick={() => setAuthScreen("login")}>
+                <RouterLink
+                    onClick={() => {
+                        setAuthScreen("login");
+                    }}
+                    to={"/auth"}
+                >
                     Login
                 </RouterLink>
             )}
@@ -47,6 +56,9 @@ const Header = () => {
                     <RouterLink to={`/chat`}>
                         <BsFillChatQuoteFill size={24} />
                     </RouterLink>
+                    <RouterLink to={`/settings`}>
+                        <MdOutlineSettings size={24} />
+                    </RouterLink>
                     <Button size={"xs"} onClick={logout}>
                         <FiLogOut size={20} />
                     </Button>
@@ -54,7 +66,12 @@ const Header = () => {
             )}
 
             {!user && (
-                <RouterLink onClick={() => setAuthScreen("signup")}>
+                <RouterLink
+                    onClick={() => {
+                        setAuthScreen("signup");
+                    }}
+                    to={"/auth"}
+                >
                     Sign up
                 </RouterLink>
             )}

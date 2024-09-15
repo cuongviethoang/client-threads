@@ -1,21 +1,25 @@
-import { Avatar, Box, Flex, Image, Text } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
-import Actions from "./Actions";
 import { useEffect, useState } from "react";
-import useShowToast from "../hooks/useShowToast";
-
-import { formatDistanceToNow } from "date-fns";
+import { Avatar, Box, Flex, Image, Text } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
+import { Link, useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 import { useRecoilState, useRecoilValue } from "recoil";
+
 import userAtom from "../atoms/userAtom";
 import postsAtom from "../atoms/postAtom";
+
+import useShowToast from "../hooks/useShowToast";
+
+import Actions from "./Actions";
 
 const Post = ({ post, postedBy }) => {
     const navigation = useNavigate();
     const showToast = useShowToast();
-    const [user, setUser] = useState(null);
+
     const currentUser = useRecoilValue(userAtom);
     const [posts, setPosts] = useRecoilState(postsAtom);
+
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         const getUser = async () => {
@@ -33,19 +37,16 @@ const Post = ({ post, postedBy }) => {
                 setUser(null);
             }
         };
-
         getUser();
     }, [postedBy, showToast]);
 
     if (!user) return null;
 
-    // chuyển đến trang cá nhân của người dùng
     const handleGoToUserPage = (e) => {
         e.preventDefault();
         navigation(`/${user?.username}`);
     };
 
-    //delete post
     const handleDeletePost = async (e) => {
         try {
             e.preventDefault();
@@ -55,13 +56,11 @@ const Post = ({ post, postedBy }) => {
             const res = await fetch(`/api/posts/${post._id}`, {
                 method: "DELETE",
             });
-
             const data = await res.json();
             if (data?.error) {
                 showToast("Error", data?.error, "error");
                 return;
             }
-
             showToast("Success", data?.message, "success");
             setPosts(posts.filter((p) => p?._id !== post?._id));
         } catch (e) {

@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import {
     Button,
     Flex,
@@ -10,14 +11,20 @@ import {
     Avatar,
     Center,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
 import { useRecoilState } from "recoil";
+
 import userAtom from "../atoms/userAtom";
+
 import usePreviewImg from "../hooks/usePreviewImg";
 import useShowToast from "../hooks/useShowToast";
 
 export default function UpdateProfilePage() {
     const [user, setUser] = useRecoilState(userAtom);
+
+    const { handleImageChange, imgUrl } = usePreviewImg();
+    const showToast = useShowToast();
+
+    const fileRef = useRef();
 
     const [inputs, setInputs] = useState({
         name: user.name,
@@ -26,13 +33,7 @@ export default function UpdateProfilePage() {
         bio: user.bio,
         password: "",
     });
-
-    const fileRef = useRef();
     const [updating, setUpdating] = useState(false);
-
-    const { handleImageChange, imgUrl } = usePreviewImg();
-
-    const showToast = useShowToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -47,7 +48,6 @@ export default function UpdateProfilePage() {
                 body: JSON.stringify({ ...inputs, profilePic: imgUrl }),
             });
             const data = await res.json();
-
             if (data.error) {
                 showToast("Error", data.error, "error");
                 return;

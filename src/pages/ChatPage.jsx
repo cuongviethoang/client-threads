@@ -1,4 +1,4 @@
-import { SearchIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -9,24 +9,25 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
-import Conversation from "../components/Conversation";
+import { SearchIcon } from "@chakra-ui/icons";
 import { GiConversation } from "react-icons/gi";
-import MessageContainer from "../components/MessageContainer";
-import { useEffect, useState } from "react";
-import useShowToast from "../hooks/useShowToast";
 import { useRecoilState, useRecoilValue } from "recoil";
+
 import {
     conversationsAtom,
     selectedConversationAtom,
 } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
+
 import { useSocket } from "../context/SocketContext";
+
+import useShowToast from "../hooks/useShowToast";
+
+import Conversation from "../components/Conversation";
+import MessageContainer from "../components/MessageContainer";
 
 const ChatPage = () => {
     const showToast = useShowToast();
-    const [loadingConversations, setLoadingConversations] = useState(true);
-    const [searchText, setSearchText] = useState("");
-    const [searchingUser, setSearchingUser] = useState(false);
 
     const [conversations, setConversations] = useRecoilState(conversationsAtom);
     const [selectedConversation, setSelectedConversation] = useRecoilState(
@@ -35,6 +36,10 @@ const ChatPage = () => {
     const currentUser = useRecoilValue(userAtom);
 
     const { socket, onlineUsers } = useSocket();
+
+    const [loadingConversations, setLoadingConversations] = useState(true);
+    const [searchText, setSearchText] = useState("");
+    const [searchingUser, setSearchingUser] = useState(false);
 
     useEffect(() => {
         socket?.on("messagesSeen", ({ conversationId }) => {

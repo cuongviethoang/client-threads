@@ -1,34 +1,38 @@
 import { useEffect, useState } from "react";
-import UserHeader from "../components/UserHeader";
 import { useParams } from "react-router-dom";
-import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
-import Post from "../components/Post";
-import useGetUserProfile from "../hooks/useGetUserProfile";
 import { useRecoilState } from "recoil";
+
 import postsAtom from "../atoms/postAtom";
 
-// trang hiển thị tất cả bài post của 1 người dùng
+import useShowToast from "../hooks/useShowToast";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+
+import Post from "../components/Post";
+import UserHeader from "../components/UserHeader";
+
 const UserPage = () => {
     const showToast = useShowToast();
+
     const { username } = useParams();
+
     const { user, loading } = useGetUserProfile();
+
     const [posts, setPosts] = useRecoilState(postsAtom);
+
     const [fetchingPosts, setFetchingPosts] = useState(true);
 
     useEffect(() => {
         const getPosts = async () => {
+            if (!user) return;
             setFetchingPosts(true);
             try {
                 const res = await fetch(`/api/posts/user/${username}`);
-
                 const data = await res.json();
-
                 if (data?.error) {
                     showToast("Error", data?.error, "error");
                     return;
                 }
-
                 setPosts(data);
             } catch (e) {
                 showToast("Error", e, "error");
@@ -37,9 +41,8 @@ const UserPage = () => {
                 setFetchingPosts(false);
             }
         };
-        console.log(">> value posts: ", posts);
         getPosts();
-    }, [username, showToast, setPosts]);
+    }, [username, showToast, setPosts, user]);
 
     if (!user && loading) {
         return (

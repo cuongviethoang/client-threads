@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Box,
     Button,
@@ -14,9 +15,10 @@ import {
     Text,
     useDisclosure,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import useShowToast from "../hooks/useShowToast";
 import { useRecoilState, useRecoilValue } from "recoil";
+
+import useShowToast from "../hooks/useShowToast";
+
 import userAtom from "../atoms/userAtom";
 import postsAtom from "../atoms/postAtom";
 
@@ -24,21 +26,19 @@ const MAX_CHAR = 200;
 
 const Actions = ({ post }) => {
     const user = useRecoilValue(userAtom);
-    const [liked, setLiked] = useState(post?.likes.includes(user?._id));
     const [posts, setPosts] = useRecoilState(postsAtom);
+
+    const [liked, setLiked] = useState(post?.likes.includes(user?._id));
     const [isLiking, setIsLiking] = useState(false);
 
     const showToast = useShowToast();
 
-    // like and unlike
     const handleLikeAndUnlike = async () => {
         if (!user) {
             showToast("Error", "You must be logged in to like a post", "error");
             return;
         }
-        // đang trong quá trình xử lý like, ko cho phép click nhiều lần
         if (isLiking) return;
-
         setIsLiking(true);
         try {
             const res = await fetch(`/api/posts/like/${post?._id}`, {

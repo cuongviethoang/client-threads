@@ -23,7 +23,7 @@ export const SocketContextProvider = ({ children }) => {
 
         setSocket(socket);
 
-        // lắng nghe tất cả sự kiện có topic là getOnlineUsers
+        // lắng nghe 1 event getOnlineUsers được bắt lên từ BE chứa id của các user đang online
         socket.on("getOnlineUsers", (users) => {
             setOnlineUsers(users);
         });

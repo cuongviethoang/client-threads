@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
     Avatar,
     Box,
@@ -6,12 +7,13 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+
 import useFollowUnfollow from "../hooks/useFollowUnfollow";
 
 const SuggestedUser = ({ user }) => {
     const { handleFollowUnFollow, updating, following } =
         useFollowUnfollow(user);
+
     return (
         <>
             <Flex

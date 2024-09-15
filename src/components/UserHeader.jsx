@@ -12,18 +12,21 @@ import {
     Text,
     VStack,
 } from "@chakra-ui/react";
-import { BsInstagram } from "react-icons/bs";
-import { CgMoreO } from "react-icons/cg";
-import { useRecoilValue } from "recoil";
-import userAtom from "../atoms/userAtom";
 import { Link as RouterLink } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+
+import { CgMoreO } from "react-icons/cg";
+import { BsInstagram } from "react-icons/bs";
+
+import userAtom from "../atoms/userAtom";
+
 import useShowToast from "../hooks/useShowToast";
 import useFollowUnfollow from "../hooks/useFollowUnfollow";
 
 const UserHeader = ({ user }) => {
     const showToast = useShowToast();
 
-    const currentUser = useRecoilValue(userAtom); // this is my profile
+    const currentUser = useRecoilValue(userAtom);
 
     const { handleFollowUnFollow, updating, following } =
         useFollowUnfollow(user);
